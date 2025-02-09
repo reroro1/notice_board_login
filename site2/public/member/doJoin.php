@@ -32,14 +32,18 @@ if ( getRowValue($sql) > 0 ) {
     jsHistoryBack();
 }
 
+$plainLoginPw = $_REQUEST['loginPw'];  // 사용자가 입력한 비밀번호
+$hashedLoginPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);  
+// PHP 내장 함수로 해싱 (기본 알고리즘: bcrypt)
+
+// 이후 INSERT 시 $hashedLoginPw 를 저장
 $sql = "
 INSERT INTO member
 SET regDate = NOW(),
 loginId = '{$_REQUEST['loginId']}',
-loginPw = '{$_REQUEST['loginPw']}',
+loginPw = '{$hashedLoginPw}',
 nickname = '{$_REQUEST['nickname']}'
 ";
-
 execute($sql);
 
 jsAlert('가입이 완료 되었습니다.');
