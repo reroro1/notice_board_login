@@ -1,50 +1,33 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 
-if ( isset($_REQUEST['nickname']) == false ) {
-    $_REQUEST['nickname'] = '';
-}
-
-if ( empty($_REQUEST['nickname']) ) {
-    jsAlert("닉네임을 입력해주세요.");
-    jsHistoryBack();    
-}
-
 $sql = "
-SELECT COUNT(*)
+SELECT *
 FROM member
 WHERE loginId = '{$_REQUEST['loginId']}'
 ";
 
-if ( getRowValue($sql) > 0 ) {
-    jsAlert("이미 사용중인 로그인 아이디 입니다.");
+$memberInfo = getRow($sql);
+
+if ( empty($memberInfo) ) {
+    jsAlert("존재하지 않는 아이디입니다.");
     jsHistoryBack();
 }
 
-$sql = "
-SELECT COUNT(*)
-FROM member
-WHERE nickname = '{$_REQUEST['nickname']}'
-";
+// 사용자가 폼에 입력한 평문 비밀번호
+$plainLoginPw = $_REQUEST['loginPw'];  
 
-if ( getRowValue($sql) > 0 ) {
-    jsAlert("이미 사용중인 닉네임 입니다.");
+// DB에서 가져온 해시된 비밀번호
+$hashedLoginPw = $memberInfo['loginPw'];
+
+// password_verify()로 검증
+if ( password_verify($plainLoginPw, $hashedLoginPw) === false ) {
+    jsAlert("비밀번호가 일치하지 않습니다.");
     jsHistoryBack();
 }
 
-$plainLoginPw = $_REQUEST['loginPw'];  // 사용자가 입력한 비밀번호
-$hashedLoginPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);  
-// PHP 내장 함수로 해싱 (기본 알고리즘: bcrypt)
+// 비밀번호도 일치하면 로그인 세션 저장
+$_SESSION['loginedMemberInfo'] = $memberInfo;
 
-// 이후 INSERT 시 $hashedLoginPw 를 저장
-$sql = "
-INSERT INTO member
-SET regDate = NOW(),
-loginId = '{$_REQUEST['loginId']}',
-loginPw = '{$hashedLoginPw}',
-nickname = '{$_REQUEST['nickname']}'
-";
-execute($sql);
-
-jsAlert('가입이 완료 되었습니다.');
-jsLocationReplace('/member/login.php');
+jsAlert('로그인 되었습니다.');
+jsLocationReplace('/article/list.php');
