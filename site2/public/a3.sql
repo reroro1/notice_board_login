@@ -19,3 +19,5 @@ CREATE TABLE article (
 `title``member``memberId``body`    BODY TEXT NOT NULL,
     writer CHAR(100) NOT NULL
 );
+ALTER TABLE MEMBER
+MODIFY COLUMN loginPw VARCHAR(255) NOT NULL;
