@@ -78,10 +78,14 @@ getLastInsertId()
 회원 가입 (public/member/doJoin.php & public/member/join.php)</br></br>
 가입 폼(public/member/join.php)에서 입력받은 로그인 아이디, 비밀번호, 닉네임을 바탕으로</br> 
 중복 여부를 체크한 후, 문제가 없으면 회원 정보를 member 테이블에 저장합니다.</br>
+또한, password_hash() 함수로 비밀번호를 해싱한 뒤에 저장합니다.<br>
+
 </br>
 로그인 (public/member/doLogin.php & public/member/login.php)</br>
 로그인 폼에서 입력한 정보로 회원 정보를 조회하고, </br>
 일치하는 회원이 있으면 세션에 회원 정보를 저장하여 로그인 상태를 유지합니다.</br>
+loginId만으로 회원 정보를 먼저 가져오고<br>
+DB에서 가져온 loginPw(해시 값)과 사용자가 입력한 평문 비밀번호를 password_verify()로 비교합니다.<br>
 </br>
 로그아웃 (public/member/doLogout.php)</br>
 현재의 세션을 파괴하여 로그아웃 처리를 하고, 로그인 페이지로 이동시킵니다.</br>
