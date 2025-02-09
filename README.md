@@ -1,11 +1,11 @@
-##공통 기능 라이브러리 (lib.php)
+공통 기능 라이브러리 (lib.php)
 
-##SQL 실행 및 결과 처리 함수
+** SQL 실행 및 결과 처리 함수
 
 execute($sql)
 주어진 SQL 문을 실행합니다.
 
-getRows($sql), getRow($sql), getRowValue($sql)
+getRows($sql), getRow($sql), getRowValue($sql) </br>
 SQL 실행 결과를 배열 형태로 받아오거나 단일 행/값을 반환합니다.
 
 
