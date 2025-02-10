@@ -16,7 +16,7 @@ CREATE TABLE article (
     PRIMARY KEY(id),
     regDate DATETIME NOT NULL,
     memberId INT(10) UNSIGNED NOT NULL,
-`title``member``memberId``body`    BODY TEXT NOT NULL,
+    BODY TEXT NOT NULL,
     writer CHAR(100) NOT NULL
 );
 ALTER TABLE MEMBER
