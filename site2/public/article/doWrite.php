@@ -6,6 +6,12 @@ if (!isLogined()) {
     jsHistoryBack();
 }
 
+// CSRF 검증 추가
+if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    jsAlert("잘못된 요청입니다.");
+    jsHistoryBack();
+}
+
 $title = $_REQUEST['title'] ?? '';
 $body = $_REQUEST['body'] ?? '';
 
