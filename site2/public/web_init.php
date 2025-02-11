@@ -1,7 +1,4 @@
 <?php
-// 프로젝트 폴더/web_init.php
-
-// 세션 시작
 session_start();
 
 define('DB_HOST', 'localhost');
@@ -13,4 +10,8 @@ $dbConn = mysqli_connect(DB_HOST, DB_ID, DB_PW, DB_NAME) or die('DB CONNECTION E
 
 require_once __DIR__ . '/lib.php';
 
-// DB 연결
+// CSRF 토큰 생성
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
