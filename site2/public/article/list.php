@@ -2,13 +2,10 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/part/head.php';
 
-$sql = "
-SELECT *
-FROM article
-ORDER BY id DESC
-";
+$conn = getDatabaseConnection();
 
-$articleInfos = getRows($sql);
+$sql = "SELECT * FROM article ORDER BY id DESC";
+$result = $conn->query($sql);
 ?>
 
 <table border="1">
@@ -21,13 +18,13 @@ $articleInfos = getRows($sql);
         </tr>
     </thead>
     <tbody>
-        <?php foreach ( $articleInfos as $articleInfo ) { ?>
+        <?php while ($articleInfo = $result->fetch_assoc()) { ?>
         <tr>
-            <td><?=$articleInfo['id']?></td>
-            <td><?=$articleInfo['regDate']?></td>
-            <td><a href="./detail.php?id=<?=$articleInfo['id']?>"><?=$articleInfo['title']?></a></td>
+            <td><?= htmlspecialchars($articleInfo['id']) ?></td>
+            <td><?= htmlspecialchars($articleInfo['regDate']) ?></td>
+            <td><a href="./detail.php?id=<?= $articleInfo['id'] ?>"><?= htmlspecialchars($articleInfo['title']) ?></a></td>
             <td>
-                <a href="./doDelete.php?id=<?=$articleInfo['id']?>">삭제</a>
+                <a href="./doDelete.php?id=<?= $articleInfo['id'] ?>">삭제</a>
             </td>
         </tr>    
         <?php } ?>
@@ -36,3 +33,4 @@ $articleInfos = getRows($sql);
 
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/part/foot.php';
+?>
