@@ -1,10 +1,10 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 
-$conn = getDatabaseConnection(); // DB 연결 함수
+$conn = getDatabaseConnection();
 
-// 사용자 입력값을 XSS 방어 처리
 $loginId = htmlspecialchars($_REQUEST['loginId'], ENT_QUOTES, 'UTF-8');
+$plainLoginPw = $_REQUEST['loginPw'];
 
 $sql = "SELECT * FROM member WHERE loginId = ?";
 $stmt = $conn->prepare($sql);
@@ -19,8 +19,6 @@ if (empty($memberInfo)) {
     jsHistoryBack();
 }
 
-// 비밀번호 검증
-$plainLoginPw = $_REQUEST['loginPw'];
 $hashedLoginPw = $memberInfo['loginPw'];
 
 if (!password_verify($plainLoginPw, $hashedLoginPw)) {
@@ -28,19 +26,9 @@ if (!password_verify($plainLoginPw, $hashedLoginPw)) {
     jsHistoryBack();
 }
 
-// 비밀번호 자동 업그레이드 (선택적 적용)
+// 최신 비밀번호 해싱 방식으로 자동 업그레이드
 if (password_needs_rehash($hashedLoginPw, PASSWORD_DEFAULT)) {
     $newHashedPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);
     $sql = "UPDATE member SET loginPw = ? WHERE loginId = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $newHashedPw, $loginId);
-    $stmt->execute();
-    $stmt->close();
-}
-
-// 로그인 성공 -> 세션 저장
-$_SESSION['loginedMemberInfo'] = $memberInfo;
-
-jsAlert('로그인 되었습니다.');
-jsLocationReplace('/article/list.php');
-?>
+    $
