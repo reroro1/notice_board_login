@@ -6,7 +6,7 @@ if (!isLogined()) {
     jsHistoryBack();
 }
 
-$id = $_REQUEST['id'] ?? '';
+$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 
 if (empty($id)) {
     jsAlert("삭제할 ID를 입력해주세요.");
@@ -14,7 +14,6 @@ if (empty($id)) {
 }
 
 $loginedMemberInfo = $_SESSION['loginedMemberInfo'];
-
 $conn = getDatabaseConnection();
 
 // 게시글 작성자 확인
