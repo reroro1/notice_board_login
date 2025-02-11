@@ -1,65 +1,71 @@
 <?php
 
-function execute($sql) {
+// DB 실행 함수 (Prepared Statement 적용)
+function execute($sql, $params = []) {
     global $dbConn;
-    return mysqli_query($dbConn, $sql);
-}
+    $stmt = $dbConn->prepare($sql);
 
-function getRows($sql) {
-    $rs = execute($sql);
-
-    $rows = [];
-
-    while ( $row = mysqli_fetch_assoc($rs) ) {
-        $rows[] = $row;
+    if ($stmt === false) {
+        die('SQL PREPARE ERROR: ' . $dbConn->error);
     }
 
-    return $rows;
-}
-
-function getRow($sql) {
-    $rows = getRows($sql);
-
-    if ( isset($rows[0]) ) {
-        return $rows[0];
+    if (!empty($params)) {
+        $stmt->bind_param(...$params);
     }
 
-    return [];
+    $stmt->execute();
+    return $stmt;
 }
 
-function getRowValue($sql) {
-    $row = getRow($sql);
-
-    foreach ( $row as $val ) {
-        return $val;
+// 다중 결과 가져오기 (배열 반환)
+function getRows($sql, $params = []) {
+    $stmt = execute($sql, $params);
+    $result = $stmt->get_result();
+    
+    if (!$result) {
+        return [];
     }
 
-    return null;
+    return $result->fetch_all(MYSQLI_ASSOC);
 }
 
+// 단일 행 가져오기
+function getRow($sql, $params = []) {
+    $rows = getRows($sql, $params);
+    return $rows[0] ?? [];
+}
+
+// 단일 값 가져오기
+function getRowValue($sql, $params = []) {
+    $row = getRow($sql, $params);
+    return reset($row);
+}
+
+// 안전한 alert() 메시지
 function jsAlert($msg) {
+    $msg = htmlspecialchars($msg, ENT_QUOTES, 'UTF-8');
     echo "<script> alert('{$msg}'); </script>";
 }
 
+// 안전한 history.back()
 function jsHistoryBack() {
     echo "<script> history.back(); </script>";
     exit;
 }
 
+// 안전한 location.replace()
 function jsLocationReplace($url) {
     echo "<script> location.replace('{$url}'); </script>";
     exit;
 }
 
-function jsLocationHref($msg) {
-    echo "<script> location.href = '{$url}'; </script>";
-    exit;
-}
-
+// 로그인 여부 확인 (보안 강화)
 function isLogined() {
-    return isset($_SESSION['loginedMemberInfo']);
+    return isset($_SESSION['loginedMemberInfo']) && is_array($_SESSION['loginedMemberInfo']);
 }
 
+// 마지막 삽입된 ID 가져오기
 function getLastInsertId() {
-    return getRowValue("SELECT LAST_INSERT_ID()");
+    global $dbConn;
+    return $dbConn->insert_id;
 }
