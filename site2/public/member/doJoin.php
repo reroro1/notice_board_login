@@ -1,50 +1,54 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 
-if ( isset($_REQUEST['nickname']) == false ) {
-    $_REQUEST['nickname'] = '';
-}
+// 닉네임이 입력되지 않았을 경우 기본값 설정
+$nickname = $_REQUEST['nickname'] ?? '';
 
-if ( empty($_REQUEST['nickname']) ) {
+if ( empty($nickname) ) {
     jsAlert("닉네임을 입력해주세요.");
-    jsHistoryBack();    
+    jsHistoryBack();
 }
 
-$sql = "
-SELECT COUNT(*)
-FROM member
-WHERE loginId = '{$_REQUEST['loginId']}'
-";
+$conn = getDatabaseConnection(); // DB 연결 함수 (사용하는 DB 커넥션 함수에 맞게 수정)
 
-if ( getRowValue($sql) > 0 ) {
+// 1. 로그인 아이디 중복 체크
+$sql = "SELECT COUNT(*) FROM member WHERE loginId = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $_REQUEST['loginId']);
+$stmt->execute();
+$stmt->bind_result($count);
+$stmt->fetch();
+$stmt->close();
+
+if ($count > 0) {
     jsAlert("이미 사용중인 로그인 아이디 입니다.");
     jsHistoryBack();
 }
 
-$sql = "
-SELECT COUNT(*)
-FROM member
-WHERE nickname = '{$_REQUEST['nickname']}'
-";
+// 2. 닉네임 중복 체크
+$sql = "SELECT COUNT(*) FROM member WHERE nickname = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $nickname);
+$stmt->execute();
+$stmt->bind_result($count);
+$stmt->fetch();
+$stmt->close();
 
-if ( getRowValue($sql) > 0 ) {
+if ($count > 0) {
     jsAlert("이미 사용중인 닉네임 입니다.");
     jsHistoryBack();
 }
 
-$plainLoginPw = $_REQUEST['loginPw'];  // 사용자가 입력한 비밀번호
-$hashedLoginPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);  
-// PHP 내장 함수로 해싱 (기본 알고리즘: bcrypt)
+// 3. 비밀번호 해싱
+$plainLoginPw = $_REQUEST['loginPw'];
+$hashedLoginPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);
 
-// 이후 INSERT 시 $hashedLoginPw 를 저장
-$sql = "
-INSERT INTO member
-SET regDate = NOW(),
-loginId = '{$_REQUEST['loginId']}',
-loginPw = '{$hashedLoginPw}',
-nickname = '{$_REQUEST['nickname']}'
-";
-execute($sql);
+// 4. 회원가입 정보 저장
+$sql = "INSERT INTO member (regDate, loginId, loginPw, nickname) VALUES (NOW(), ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sss", $_REQUEST['loginId'], $hashedLoginPw, $nickname);
+$stmt->execute();
+$stmt->close();
 
-jsAlert('가입이 완료 되었습니다.');
+jsAlert('가입이 완료되었습니다.');
 jsLocationReplace('/member/login.php');
