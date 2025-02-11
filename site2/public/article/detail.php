@@ -4,9 +4,11 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/part/head.php';
 
 $conn = getDatabaseConnection();
 
+$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
+
 $sql = "SELECT * FROM article WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $_REQUEST['id']);
+$stmt->bind_param("i", $id);
 $stmt->execute();
 $articleInfo = $stmt->get_result()->fetch_assoc();
 $stmt->close();
@@ -16,15 +18,15 @@ $stmt->close();
     <tbody>
         <tr>
             <th>ID</th>
-            <td><?=$articleInfo['id']?></td>
+            <td><?=htmlspecialchars($articleInfo['id'])?></td>
         </tr>
         <tr>
             <th>날짜</th>
-            <td><?=$articleInfo['regDate']?></td>
+            <td><?=htmlspecialchars($articleInfo['regDate'])?></td>
         </tr>
         <tr>
             <th>제목</th>
-            <td><?=$articleInfo['title']?></td>
+            <td><?=htmlspecialchars($articleInfo['title'])?></td>
         </tr>
         <tr>
             <th>내용</th>
