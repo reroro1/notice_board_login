@@ -2,7 +2,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 
 // 닉네임이 입력되지 않았을 경우 기본값 설정
-$nickname = $_REQUEST['nickname'] ?? '';
+$nickname = htmlspecialchars($_REQUEST['nickname'], ENT_QUOTES, 'UTF-8');
 
 if ( empty($nickname) ) {
     jsAlert("닉네임을 입력해주세요.");
