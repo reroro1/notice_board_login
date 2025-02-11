@@ -1,19 +1,37 @@
-
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/part/head.php';
+
+$nickname = htmlspecialchars($_REQUEST['nickname'], ENT_QUOTES, 'UTF-8');
+
+if (empty($nickname)) {
+    jsAlert("닉네임을 입력해주세요.");
+    jsHistoryBack();
+}
+
+$conn = getDatabaseConnection();
+
+$sql = "SELECT COUNT(*) FROM member WHERE loginId = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $_REQUEST['loginId']);
+$stmt->execute();
+$stmt->bind_result($count);
+$stmt->fetch();
+$stmt->close();
+
+if ($count > 0) {
+    jsAlert("이미 사용중인 로그인 아이디 입니다.");
+    jsHistoryBack();
+}
+
+$plainLoginPw = $_REQUEST['loginPw'];
+$hashedLoginPw = password_hash($plainLoginPw, PASSWORD_DEFAULT);
+
+$sql = "INSERT INTO member (regDate, loginId, loginPw, nickname) VALUES (NOW(), ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sss", $_REQUEST['loginId'], $hashedLoginPw, $nickname);
+$stmt->execute();
+$stmt->close();
+
+jsAlert('가입이 완료되었습니다.');
+jsLocationReplace('/member/login.php');
 ?>
-
-<div class="join-box con">
-
-<form action="doJoin.php" method="POST">
-<input name="loginId" type="text" placeholder="로그인 아이디를 입력해주세요." maxlength="20" />
-<input name="loginPw" type="password" placeholder="로그인 비번을 입력해주세요." maxlength="20" />
-<input name="nickname" type="text" placeholder="닉네임을 입력해주세요." maxlength="20" />
-<input type="submit" value="가입" />
-</form>
-
-</div>
-
-<?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/part/foot.php';
