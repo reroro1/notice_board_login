@@ -6,8 +6,8 @@ if (!isLogined()) {
     jsHistoryBack();
 }
 
-// CSRF 검증 추가
-if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+// CSRF 검증
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
     jsAlert("잘못된 요청입니다.");
     jsHistoryBack();
 }
@@ -24,7 +24,6 @@ $loginedMemberInfo = $_SESSION['loginedMemberInfo'];
 
 $conn = getDatabaseConnection();
 
-// 게시글 작성
 $sql = "INSERT INTO article (regDate, title, body, memberId, writer) VALUES (NOW(), ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ssis", $title, $body, $loginedMemberInfo['id'], $loginedMemberInfo['nickname']);
