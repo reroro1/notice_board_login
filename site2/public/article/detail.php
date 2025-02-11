@@ -2,13 +2,14 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/web_init.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/part/head.php';
 
-$sql = "
-SELECT *
-FROM article
-WHERE id = '{$_REQUEST['id']}'
-";
+$conn = getDatabaseConnection();
 
-$articleInfo = getRow($sql);
+$sql = "SELECT * FROM article WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $_REQUEST['id']);
+$stmt->execute();
+$articleInfo = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 ?>
 
 <table border="1">
@@ -27,7 +28,7 @@ $articleInfo = getRow($sql);
         </tr>
         <tr>
             <th>내용</th>
-            <td><?=nl2br($articleInfo['body'])?></td>
+            <td><?=nl2br(htmlspecialchars($articleInfo['body']))?></td>
         </tr>
         <tr>
             <th>비고</th>
@@ -40,3 +41,4 @@ $articleInfo = getRow($sql);
 
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/part/foot.php';
+?>
